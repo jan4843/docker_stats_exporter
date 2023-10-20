@@ -21,6 +21,7 @@ services:
     build: https://github.com/jan4843/docker_stats_exporter.git
     environment:
       LABEL_state: '{{.Container.State}}'
+      LABEL_health: '{{.ContainerJSON.State.Health.Status}}'
       LABEL_compose_project: '{{index .Container.Labels "com.docker.compose.project"}}'
     ports:
       - 9338:9338
@@ -38,9 +39,9 @@ By default, metrics are retrieved from the Docker socket at `/var/run/docker.soc
 
 The only label exposed for all metrics is `name`, the container name.
 
-To expose additional labels, environmental variables with a `LABEL_` prefix are used. The environmental variable name (excluding the prefix) is used as the metric name, and its value [Go-templated](https://pkg.go.dev/text/template) on a [`Container` struct](https://pkg.go.dev/github.com/docker/docker/api/types#Container).
+To expose additional labels, environmental variables with a `LABEL_` prefix are used. The environmental variable name (excluding the prefix) is used as the metric name, and its value [Go-templated](https://pkg.go.dev/text/template) with [`Container` struct](https://pkg.go.dev/github.com/docker/docker/api/types#Container) and [`ContainerJSON` struct](https://pkg.go.dev/github.com/docker/docker/api/types#ContainerJSON) variables in scope.
 
-See the Docker Compose example above adding the `state` and `compose_project` metric labels.
+See the Docker Compose example above adding the `state`, `health`, and `compose_project` metric labels.
 
 ## Metrics
 

@@ -59,10 +59,21 @@ func (e *exporter) Collect(ch chan<- prometheus.Metric) {
 }
 
 func (e *exporter) collectContainer(container *types.Container, ch chan<- prometheus.Metric) error {
+	containerJson, err := e.docker.ContainerInspect(context.TODO(), container.ID)
+	if err != nil {
+		return err
+	}
+
 	labelsNames := []string{"name"}
 	labelsValues := []string{strings.Trim(container.Names[0], "/")}
 	for labelName, labelTemplate := range e.extraLabels {
-		templateData := struct{ Container *types.Container }{container}
+		templateData := struct {
+			Container     *types.Container
+			ContainerJSON types.ContainerJSON
+		}{
+			container,
+			containerJson,
+		}
 		var labelValue bytes.Buffer
 		labelTemplate.Execute(&labelValue, templateData)
 		labelsNames = append(labelsNames, labelName)
